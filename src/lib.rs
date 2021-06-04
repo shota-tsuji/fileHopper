@@ -15,22 +15,21 @@ mod tests {
     fn when_create_then_create_event() {
         const TARGET_DIR: &'static str = "/tmp/test/notify/";
 
-        let taret_path = PathBuf::from(TARGET_DIR);
-        let expected_path = PathBuf::from(TARGET_DIR.to_string() + "file1");
+        let dir_location = PathBuf::from(TARGET_DIR);
+        let file_location = PathBuf::from(TARGET_DIR.to_string() + "file1");
 
-        let _ = fs::create_dir_all(taret_path.as_path());
-        let _ = fs::remove_file(expected_path.as_path());
+        let _ = fs::create_dir_all(dir_location.as_path());
+        let _ = fs::remove_file(file_location.as_path());
 
         let (tx, rx) = channel();
         let mut watcher = watcher(tx, Duration::from_secs(1)).unwrap();
 
         watcher
-            .watch(taret_path.as_path(), RecursiveMode::Recursive)
+            .watch(dir_location.as_path(), RecursiveMode::Recursive)
             .unwrap();
 
-        let _ = File::create(expected_path.as_path());
+        let _ = File::create(file_location.as_path());
 
-        let result = rx.recv().unwrap();
-        assert_eq!(Create(expected_path), result);
+        assert_eq!(Create(file_location), rx.recv().unwrap());
     }
 }
